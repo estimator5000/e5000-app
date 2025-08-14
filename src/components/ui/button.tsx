@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow-sm",
   {
     variants: {
       variant: {
@@ -13,27 +13,28 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-full",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-accent hover:text-accent-foreground rounded-full",
         link: "text-primary underline-offset-4 hover:underline",
-        // Your retro color variants
+        // Modern app-style color variants
         teal: "bg-accent-teal text-white hover:bg-accent-teal/90",
         orange: "bg-accent-orange text-white hover:bg-accent-orange/90",
-        green: "bg-accent-green text-white hover:bg-accent-green/90",
+        cream: "bg-accent-cream text-accent-brown hover:bg-accent-brown hover:text-white",
+        blue: "bg-accent-blue text-white hover:bg-accent-blue/90",
         purple: "bg-accent-purple text-white hover:bg-accent-purple/90",
         red: "bg-accent-red text-white hover:bg-accent-red/90",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "h-11 px-5",
+        sm: "h-9 px-4",
+        lg: "h-12 px-7",
+        icon: "h-11 w-11",
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "orange",
       size: "default",
     },
   }

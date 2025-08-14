@@ -190,17 +190,17 @@ export default function PhotoCapture({ sessionId, onPhotoUploaded, existingPhoto
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Camera View */}
       {showCamera && (
         <Card>
           <CardContent className="p-4">
-            <div className="relative">
+            <div className="relative rounded-xl overflow-hidden border">
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
-                className="w-full rounded-lg"
+                className="w-full"
               />
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
                 <Button
@@ -227,69 +227,49 @@ export default function PhotoCapture({ sessionId, onPhotoUploaded, existingPhoto
 
       {/* Image Preview */}
       {capturedImage && !showCamera && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="relative">
-              <img 
-                src={capturedImage} 
-                alt="Captured property" 
-                className="w-full rounded-lg"
-              />
-              <div className="absolute top-2 right-2 flex space-x-2">
-                <Button
-                  onClick={clearImage}
-                  variant="outline"
-                  size="sm"
-                  className="bg-white text-black hover:bg-gray-100"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-3">
+          <div className="relative rounded-xl overflow-hidden border shadow-sm">
+            <img 
+              src={capturedImage} 
+              alt="Captured property" 
+              className="w-full block"
+            />
+            <button
+              onClick={clearImage}
+              className="retro-chip absolute top-2 right-2"
+              type="button"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Action Buttons */}
       {!capturedImage && !showCamera && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Button
+        <div className="flex flex-col md:flex-row items-start gap-3 md:gap-4">
+          <button
             onClick={startCamera}
-            className="bg-blue-600 hover:bg-blue-700 h-20 text-lg"
+            className="retro-cta text-base px-6"
           >
-            <Camera className="w-6 h-6 mr-3" />
-            Take Photo
-          </Button>
-          <Button
+            <Camera className="w-5 h-5 mr-2" /> Take Photo
+          </button>
+          <button
             onClick={() => fileInputRef.current?.click()}
-            variant="outline"
-            className="h-20 text-lg"
+            className="retro-cta text-base px-6"
           >
-            <Upload className="w-6 h-6 mr-3" />
-            Upload Photo
-          </Button>
+            <Upload className="w-5 h-5 mr-2" /> Upload Photo
+          </button>
         </div>
       )}
 
       {/* Upload Button */}
       {capturedImage && !showCamera && (
-        <Button
-          onClick={uploadImage}
-          disabled={isUploading}
-          className="w-full bg-green-600 hover:bg-green-700 h-12 text-lg"
-        >
-          {isUploading ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Check className="w-5 h-5 mr-3" />
-              Save Photo
-            </>
-          )}
-        </Button>
+        <div className="flex justify-end mt-4 mb-8">
+          <button onClick={uploadImage} disabled={isUploading} className="retro-cta text-base px-6">
+            {isUploading ? 'Uploading…' : 'Save Photo'}
+          </button>
+        </div>
       )}
 
       {/* Hidden file input */}

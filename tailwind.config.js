@@ -42,12 +42,14 @@ module.exports = {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
-          // Your retro accent colors
+          // Retro accent colors inspired by vintage aesthetic
           teal: "rgb(var(--accent-teal))",
           orange: "rgb(var(--accent-orange))",
-          green: "rgb(var(--accent-green))",
-          purple: "rgb(var(--accent-purple))",
+          cream: "rgb(var(--accent-cream))",
+          brown: "rgb(var(--accent-brown))",
           red: "rgb(var(--accent-red))",
+          blue: "rgb(var(--accent-blue))",
+          purple: "rgb(var(--accent-purple))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",

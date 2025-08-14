@@ -151,163 +151,119 @@ export default function MockupGenerator({ session, onMockupGenerated }: MockupGe
   }
 
   return (
-    <div className="space-y-6">
+    <div className="card-stack">
       {/* Original Photo Reference */}
       {session.original_image_url && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Original Property Photo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <img 
-              src={session.original_image_url} 
-              alt="Original property" 
-              className="w-full max-w-md rounded-lg border"
+        <div className="retro-card-tile">
+          <div className="mb-2">
+            <h3 className="retro-card-title">Original Property Photo</h3>
+          </div>
+          <div className="flex justify-center">
+            <img
+              src={session.original_image_url}
+              alt="Original property"
+              className="max-w-3xl w-full rounded-xl"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Mockup Generation */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Palette className="w-5 h-5 mr-2" />
-            AI Mockup Generation
-          </CardTitle>
-          <CardDescription>
-            Generate beautiful landscaping designs using AI
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="retro-card-tile">
+        <div className="mb-3">
+          <h3 className="retro-card-title text-base flex items-center">
+            <Palette className="w-5 h-5 mr-2" /> AI Mockup Generation
+          </h3>
+          <p className="retro-card-meta">Generate beautiful landscaping designs using AI</p>
+        </div>
+        <div className="space-y-4">
           <div>
-            <Label htmlFor="prompt">Custom Design Instructions (optional)</Label>
+            <Label htmlFor="prompt" className="retro-card-meta">Custom Design Instructions (optional)</Label>
             <Input
               id="prompt"
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
               placeholder="e.g., Add colorful flowers, modern hardscaping, drought-resistant plants..."
               disabled={isGenerating}
+              className="vercel-input"
             />
           </div>
-
-          <Button
-            onClick={generateMockup}
-            disabled={isGenerating || !session.original_image_url}
-            className="w-full bg-blue-600 hover:bg-blue-700"
-            size="lg"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Generating Mockup... (30-60 seconds)
-              </>
-            ) : (
-              <>
-                <Wand2 className="w-5 h-5 mr-2" />
-                Generate AI Mockup
-              </>
-            )}
-          </Button>
-
+          <div className="flex justify-end">
+            <button
+              onClick={generateMockup}
+              disabled={isGenerating || !session.original_image_url}
+              className="retro-cta"
+            >
+              {isGenerating ? 'Generating Mockup… (30-60s)' : 'Generate AI Mockup'}
+            </button>
+          </div>
           {!session.original_image_url && (
-            <p className="text-sm text-red-500 text-center">
-              Please upload a property photo in the previous step first.
-            </p>
+            <p className="text-sm text-red-500 text-center">Please upload a property photo in the previous step first.</p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Generated Mockups */}
       {mockups.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Mockups</CardTitle>
-            <CardDescription>
-              Select your preferred design and mark it as final
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="retro-card-tile">
+          <div className="mb-3">
+            <h3 className="retro-card-title">Generated Mockups</h3>
+            <p className="retro-card-meta">Select your preferred design and mark it as final</p>
+          </div>
+          <div>
             <div className="grid gap-4">
               {mockups.map((mockup, index) => (
                 <div 
                   key={mockup.id} 
-                  className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                  className={`rounded-lg p-4 cursor-pointer transition-shadow ${
                     selectedMockup?.id === mockup.id 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'shadow-md bg-orange-50' 
+                      : 'shadow-sm hover:shadow-md'
                   }`}
                   onClick={() => setSelectedMockup(mockup)}
                 >
-                  <div className="flex items-start space-x-4">
-                    <img 
-                      src={mockup.image_url} 
-                      alt={`Mockup ${index + 1}`}
-                      className="w-32 h-32 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium">
-                            Mockup {index + 1}
-                            {mockup.is_final && (
-                              <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                                Final
-                              </span>
-                            )}
-                          </h4>
-                          <p className="text-sm text-gray-500">
-                            Generated {new Date(mockup.created_at!).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div className="flex space-x-2">
-                          {!mockup.is_final && (
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                markAsFinal(mockup.id)
-                              }}
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              Mark as Final
-                            </Button>
-                          )}
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              window.open(mockup.image_url, '_blank')
-                            }}
-                            size="sm"
-                            variant="outline"
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-medium">Mockup {index + 1} {mockup.is_final && (
+                          <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Final</span>
+                        )}</h4>
+                        <p className="text-sm text-gray-500">Generated {new Date(mockup.created_at!).toLocaleDateString()}</p>
                       </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); window.open(mockup.image_url, '_blank') }}
+                        className="retro-chip"
+                        title="Open full image"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
                     </div>
+                    <img src={mockup.image_url} alt={`Mockup ${index + 1}`} className="w-full max-w-3xl mx-auto rounded-lg object-cover" />
+                    {!mockup.is_final && (
+                      <div className="flex justify-end mt-8">
+                        <button className="retro-cta" onClick={(e) => { e.stopPropagation(); markAsFinal(mockup.id) }}>
+                          Mark as Final
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Selected Mockup Preview */}
       {selectedMockup && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Preview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <img 
-              src={selectedMockup.image_url} 
-              alt="Selected mockup" 
-              className="w-full rounded-lg border"
-            />
-          </CardContent>
-        </Card>
+        <div className="retro-card-tile">
+          <div className="mb-2">
+            <h3 className="retro-card-title">Preview</h3>
+          </div>
+          <div className="flex justify-center">
+            <img src={selectedMockup.image_url} alt="Selected mockup" className="max-w-3xl w-full rounded-xl" />
+          </div>
+        </div>
       )}
     </div>
   )

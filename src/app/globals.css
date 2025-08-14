@@ -4,42 +4,57 @@
 @tailwind components;
 @tailwind utilities;
 
+.btn-orange, .retro-cta, button, .vercel-btn, .vercel-btn-primary {
+  background: #d97706 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.btn-orange:hover, .retro-cta:hover, .vercel-btn:hover, .vercel-btn-primary:hover {
+  background: #b45309 !important;
+}
+
 :root {
-  /* Shadcn/ui base variables */
-  --background: 250 250 250; /* #fafafa */
-  --foreground: 23 23 23; /* #171717 */
-  --muted: 245 245 245; /* #f5f5f5 */
-  --muted-foreground: 115 115 115; /* #737373 */
-  --popover: 255 255 255; /* #ffffff */
-  --popover-foreground: 23 23 23; /* #171717 */
-  --card: 255 255 255; /* #ffffff */
-  --card-foreground: 23 23 23; /* #171717 */
-  --border: 229 229 229; /* #e5e5e5 */
-  --input: 229 229 229; /* #e5e5e5 */
-  --primary: 20 184 166; /* #14b8a6 - Your teal color */
-  --primary-foreground: 255 255 255; /* #ffffff */
-  --secondary: 245 245 245; /* #f5f5f5 */
-  --secondary-foreground: 23 23 23; /* #171717 */
-  --accent: 245 245 245; /* #f5f5f5 */
-  --accent-foreground: 23 23 23; /* #171717 */
-  --destructive: 239 68 68; /* #ef4444 - Your red color */
-  --destructive-foreground: 255 255 255; /* #ffffff */
-  --ring: 20 184 166; /* #14b8a6 - Your teal color */
-  
-  /* Your retro accent colors (RGB format for Tailwind) */
-  --accent-teal: 20 184 166; /* #14b8a6 */
-  --accent-teal-light: 94 234 212; /* #5eead4 */
-  --accent-orange: 249 115 22; /* #f97316 */
-  --accent-orange-light: 253 186 116; /* #fdba74 */
-  --accent-green: 34 197 94; /* #22c55e */
-  --accent-green-light: 134 239 172; /* #86efac */
-  --accent-purple: 168 85 247; /* #a855f7 */
-  --accent-purple-light: 196 181 253; /* #c4b5fd */
-  --accent-red: 239 68 68; /* #ef4444 */
-  --accent-red-light: 252 165 165; /* #fca5a5 */
-  
-  /* Radius */
-  --radius: 0.5rem; /* 8px */
+  /* App theme aligned with reference UI */
+  --card-gap: 24px; /* uniform vertical spacing between cards */
+  --card-padding: 16px; /* standard card padding */
+  --button-gap: 10px; /* uniform spacing between buttons */
+  --button-height: 44px; /* standard CTA height */
+  --button-padding-x: 18px; /* standard CTA horizontal padding */
+  --background: 248 245 240; /* warm cream page background */
+  --foreground: 26 26 26;    /* neutral dark text */
+  --muted: 236 233 228;      /* subtle gray-beige */
+  --muted-foreground: 120 116 111;
+  --popover: 255 255 255;
+  --popover-foreground: 26 26 26;
+  --card: 255 255 255;       /* white cards */
+  --card-foreground: 26 26 26;
+  --border: 229 227 221;     /* soft border */
+  --input: 249 248 246;      /* light input */
+  --primary: 21 128 120;     /* teal-600 */
+  --primary-foreground: 255 255 255;
+  --secondary: 245 245 244;
+  --secondary-foreground: 26 26 26;
+  --accent: 234 88 12;       /* orange-600 for CTAs */
+  --accent-foreground: 255 255 255;
+  --destructive: 220 38 38;
+  --destructive-foreground: 255 255 255;
+  --ring: 21 128 120;        /* teal focus */
+
+  /* Accent palette for chips/badges */
+  --accent-teal: 21 128 120;
+  --accent-teal-light: 187 247 208;
+  --accent-orange: 234 88 12;
+  --accent-orange-light: 254 215 170;
+  --accent-cream: 250 245 239;
+  --accent-brown: 63 63 70;
+  --accent-red: 220 38 38;
+  --accent-blue: 2 132 199;
+  --accent-purple: 147 51 234;
+
+  /* Radii and shadows to match soft cards */
+  --radius: 1.25rem; /* 20px */
+  --shadow-soft: 0 4px 16px rgba(0,0,0,0.06);
 }
 
 .dark {
@@ -78,49 +93,94 @@ body {
   line-height: 1.5;
 }
 
-/* Vercel-style Card System */
+/* Global button reset for uniform rounded appearance */
+button {
+  border: none;
+  outline: none;
+  border-radius: 9999px;
+  -webkit-appearance: none;
+  appearance: none;
+  background-clip: padding-box;
+}
+
+/* Modern Card System (uniform across app) */
 .vercel-card {
-  background: var(--input);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  background: #fbf1e6; /* warm cream */
+  border: 1px solid #eadac8;
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: var(--card-gap);
 }
 
 .vercel-card:hover {
-  border-color: var(--muted);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
 .vercel-card-sm {
   padding: 16px;
-  border-radius: 8px;
+  border-radius: calc(var(--radius) - 4px);
 }
 
 .vercel-card-lg {
   padding: 32px;
-  border-radius: 16px;
+  border-radius: calc(var(--radius) + 4px);
 }
 
-/* Button System */
+/* Retro card variants */
+.retro-card-teal {
+  background: rgb(var(--accent-teal));
+  border-color: rgb(var(--accent-teal));
+  color: white;
+}
+
+.retro-card-orange {
+  background: rgb(var(--accent-orange));
+  border-color: rgb(var(--accent-orange));
+  color: white;
+}
+
+.retro-card-cream {
+  background: rgb(var(--accent-cream));
+  border-color: rgb(var(--accent-brown));
+  color: rgb(var(--accent-brown));
+}
+
+.retro-card-blue {
+  background: rgb(var(--accent-blue));
+  border-color: rgb(var(--accent-blue));
+  color: white;
+}
+
+.retro-card-red {
+  background: rgb(var(--accent-red));
+  border-color: rgb(var(--accent-red));
+  color: white;
+}
+
+.retro-card-purple {
+  background: rgb(var(--accent-purple));
+  border-color: rgb(var(--accent-purple));
+  color: white;
+}
+
+/* Modern App Button System */
 .vercel-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 40px;
-  padding: 0 20px;
+  padding: 0 16px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
   font-family: inherit;
   transition: all 0.2s ease;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: none;
   white-space: nowrap;
   text-decoration: none;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .vercel-btn:focus {
@@ -163,50 +223,66 @@ body {
   color: var(--foreground);
 }
 
-/* Accent button variants with your retro colors */
+/* Modern app button variants */
 .vercel-btn-teal {
-  background: var(--accent-teal);
+  background: rgb(var(--accent-teal));
   color: white;
 }
 
 .vercel-btn-teal:hover:not(:disabled) {
-  background: #0f766e;
+  background: rgb(45, 155, 115);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .vercel-btn-orange {
-  background: var(--accent-orange);
+  background: rgb(var(--accent-orange));
   color: white;
 }
 
 .vercel-btn-orange:hover:not(:disabled) {
-  background: #ea580c;
+  background: rgb(215, 120, 65);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.vercel-btn-green {
-  background: var(--accent-green);
+.vercel-btn-cream {
+  background: rgb(var(--accent-cream));
+  color: rgb(var(--accent-brown));
+}
+
+.vercel-btn-cream:hover:not(:disabled) {
+  background: rgb(var(--accent-brown));
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.vercel-btn-blue {
+  background: rgb(var(--accent-blue));
   color: white;
 }
 
-.vercel-btn-green:hover:not(:disabled) {
-  background: #16a34a;
-}
-
-.vercel-btn-purple {
-  background: var(--accent-purple);
-  color: white;
-}
-
-.vercel-btn-purple:hover:not(:disabled) {
-  background: #9333ea;
+.vercel-btn-blue:hover:not(:disabled) {
+  background: rgb(75, 125, 165);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .vercel-btn-red {
-  background: var(--accent-red);
+  background: rgb(var(--accent-red));
   color: white;
 }
 
 .vercel-btn-red:hover:not(:disabled) {
-  background: #dc2626;
+  background: rgb(185, 65, 45);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.vercel-btn-purple {
+  background: rgb(var(--accent-purple));
+  color: white;
+}
+
+.vercel-btn-purple:hover:not(:disabled) {
+  background: rgb(125, 95, 155);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Input System */
@@ -233,8 +309,22 @@ body {
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
 }
 
+/* Lighter placeholder text */
 .vercel-input::placeholder {
-  color: var(--muted-foreground);
+  color: rgba(0, 0, 0, 0.35);
+}
+
+/* Hide placeholder when user focuses/starts typing */
+.vercel-input:focus::placeholder {
+  color: transparent;
+}
+
+/* Apply same behavior to any plain input/textarea fields */
+input::placeholder, textarea::placeholder {
+  color: rgba(0, 0, 0, 0.35);
+}
+input:focus::placeholder, textarea:focus::placeholder {
+  color: transparent;
 }
 
 .vercel-input:hover:not(:focus) {
@@ -367,24 +457,52 @@ body {
   color: var(--accent-purple);
 }
 
-/* Utility classes for your retro colors */
-.text-accent-teal { color: var(--accent-teal); }
-.text-accent-orange { color: var(--accent-orange); }
-.text-accent-green { color: var(--accent-green); }
-.text-accent-purple { color: var(--accent-purple); }
-.text-accent-red { color: var(--accent-red); }
+/* Utility classes for retro colors */
+.text-accent-teal { color: rgb(var(--accent-teal)); }
+.text-accent-orange { color: rgb(var(--accent-orange)); }
+.text-accent-cream { color: rgb(var(--accent-cream)); }
+.text-accent-brown { color: rgb(var(--accent-brown)); }
+.text-accent-blue { color: rgb(var(--accent-blue)); }
+.text-accent-purple { color: rgb(var(--accent-purple)); }
+.text-accent-red { color: rgb(var(--accent-red)); }
 
-.bg-accent-teal { background-color: var(--accent-teal); }
-.bg-accent-orange { background-color: var(--accent-orange); }
-.bg-accent-green { background-color: var(--accent-green); }
-.bg-accent-purple { background-color: var(--accent-purple); }
-.bg-accent-red { background-color: var(--accent-red); }
+.bg-accent-teal { background-color: rgb(var(--accent-teal)); }
+.bg-accent-orange { background-color: rgb(var(--accent-orange)); }
+.bg-accent-cream { background-color: rgb(var(--accent-cream)); }
+.bg-accent-brown { background-color: rgb(var(--accent-brown)); }
+.bg-accent-blue { background-color: rgb(var(--accent-blue)); }
+.bg-accent-purple { background-color: rgb(var(--accent-purple)); }
+.bg-accent-red { background-color: rgb(var(--accent-red)); }
 
-.border-accent-teal { border-color: var(--accent-teal); }
-.border-accent-orange { border-color: var(--accent-orange); }
-.border-accent-green { border-color: var(--accent-green); }
-.border-accent-purple { border-color: var(--accent-purple); }
-.border-accent-red { border-color: var(--accent-red); }
+.border-accent-teal { border-color: rgb(var(--accent-teal)); }
+.border-accent-orange { border-color: rgb(var(--accent-orange)); }
+.border-accent-cream { border-color: rgb(var(--accent-cream)); }
+.border-accent-brown { border-color: rgb(var(--accent-brown)); }
+.border-accent-blue { border-color: rgb(var(--accent-blue)); }
+.border-accent-purple { border-color: rgb(var(--accent-purple)); }
+.border-accent-red { border-color: rgb(var(--accent-red)); }
+
+/* Text shadows for retro effect */
+.text-shadow-lg {
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.text-shadow-xl {
+  text-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Retro gradient backgrounds */
+.bg-retro-gradient {
+  background: linear-gradient(135deg, rgb(var(--accent-teal)) 0%, rgb(var(--accent-blue)) 100%);
+}
+
+.bg-retro-warm {
+  background: linear-gradient(135deg, rgb(var(--accent-orange)) 0%, rgb(var(--accent-red)) 100%);
+}
+
+.bg-retro-cool {
+  background: linear-gradient(135deg, rgb(var(--accent-blue)) 0%, rgb(var(--accent-purple)) 100%);
+}
 
 /* Animation utilities */
 .vercel-fade-in {
@@ -440,3 +558,452 @@ body {
   .vercel-card { padding: 16px; }
   .vercel-card-lg { padding: 24px; }
 }
+
+/* Enhanced responsive utilities for iPad/tablet optimization */
+@media (max-width: 768px) {
+  .vercel-h1 { font-size: 36px; }
+  .vercel-h2 { font-size: 24px; }
+  .vercel-h3 { font-size: 20px; }
+  .vercel-card { padding: 16px; }
+  .vercel-card-lg { padding: 24px; }
+  
+  /* Enhanced mobile spacing */
+  .container { padding-left: 1rem; padding-right: 1rem; }
+  .workflow-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .estimate-grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* iPad Pro optimizations */
+  .workflow-grid { grid-template-columns: repeat(3, 1fr); }
+  .estimate-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .workflow-grid { grid-template-columns: repeat(6, 1fr); }
+  .estimate-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Enhanced loading states */
+.loading-skeleton {
+  background: linear-gradient(90deg, var(--muted) 25%, var(--border) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* Enhanced workflow step styling */
+.workflow-step {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.workflow-step:hover {
+  transform: translateY(-2px);
+}
+
+.workflow-step.completed {
+  background: linear-gradient(135deg, var(--accent-teal) 0%, rgba(20, 184, 166, 0.8) 100%);
+}
+
+.workflow-step.current {
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2);
+  border-color: var(--accent-teal);
+}
+
+/* Enhanced form styling */
+.form-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  transition: all 0.2s ease;
+}
+
+.form-section:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.form-section.error {
+  border-color: var(--accent-red);
+  background: rgba(239, 68, 68, 0.02);
+}
+
+.form-section.success {
+  border-color: var(--accent-green);
+  background: rgba(34, 197, 94, 0.02);
+}
+
+/* Enhanced error and success messages */
+.alert {
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.alert-error {
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--accent-red);
+}
+
+.alert-success {
+  background: rgba(34, 197, 94, 0.05);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  color: var(--accent-green);
+}
+
+.alert-warning {
+  background: rgba(249, 115, 22, 0.05);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  color: var(--accent-orange);
+}
+
+.alert-info {
+  background: rgba(20, 184, 166, 0.05);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  color: var(--accent-teal);
+}
+
+/* Enhanced button loading states */
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+/* Enhanced image upload areas */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: var(--muted);
+}
+
+.upload-zone:hover {
+  border-color: var(--accent-teal);
+  background: rgba(20, 184, 166, 0.02);
+}
+
+.upload-zone.dragover {
+  border-color: var(--accent-teal);
+  background: rgba(20, 184, 166, 0.05);
+  transform: scale(1.02);
+}
+
+/* Enhanced mockup gallery */
+.mockup-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.mockup-card {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.mockup-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.mockup-card.selected {
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+/* Enhanced pricing grid */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.pricing-item {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.pricing-item:hover {
+  border-color: var(--accent-teal);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.pricing-item.selected {
+  border-color: var(--accent-teal);
+  background: rgba(20, 184, 166, 0.02);
+}
+
+/* Enhanced signature pad styling */
+.signature-pad {
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: crosshair;
+}
+
+.signature-pad.signed {
+  border-color: var(--accent-green);
+}
+
+/* iPad-specific touch optimizations */
+@media (pointer: coarse) {
+  .vercel-btn {
+    min-height: 44px;
+    padding: 0 24px;
+  }
+  
+  .vercel-input {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+  
+  .pricing-item {
+    padding: 20px;
+  }
+  
+  .workflow-step {
+    padding: 24px;
+  }
+}
+
+/* Enhanced focus styles for accessibility */
+.vercel-btn:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 2px;
+}
+
+.vercel-input:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 2px;
+}
+
+/* Print styles for contracts */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+  
+  body {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  
+  .vercel-card {
+    border: 1px solid #000;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}
+
+/* --- Retro shop-style UI (to match reference) --- */
+.retro-screen {
+  background: #147472;
+  background: linear-gradient(180deg, rgba(20,116,114,1) 0%, rgba(18,96,94,1) 100%);
+  border-radius: 28px;
+  padding: 24px 24px 20px 24px;
+  color: #f9fafb;
+  box-shadow: 0 20px 60px rgba(16, 24, 40, 0.15);
+}
+
+/* Global section spacing helpers */
+.section-gap-top { margin-top: 24px; }
+.section-gap-bottom { margin-bottom: 24px; }
+.page-gap { margin-top: 24px; margin-bottom: 24px; }
+.footer-gap { padding-bottom: 40px; }
+
+.retro-heading {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.retro-subheading {
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+}
+
+.retro-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.28);
+  color: #0f172a;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.35);
+  transition: all .2s ease;
+}
+
+.retro-chip:hover { filter: brightness(0.98); }
+
+.retro-chip.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 6px 14px rgba(16, 24, 40, 0.15);
+}
+
+/* Chip group spacing */
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 14px; /* row gap, column gap */
+}
+
+/* Compact chip size for small labels */
+.chip-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: #f3f4f6;
+  color: #111827;
+  transition: background .2s ease, color .2s ease;
+}
+
+.retro-card-tile {
+  background: linear-gradient(180deg,#fbf3e8 0%, #f7ebde 100%);
+  border: 1px solid #eadac8;
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform .2s ease, box-shadow .2s ease;
+  margin-bottom: var(--card-gap);
+}
+
+.retro-card-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(16, 24, 40, 0.1);
+}
+
+.retro-card-image {
+  background: linear-gradient(180deg, #f4faf8 0%, #e6f0ef 100%);
+  border-radius: 16px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.retro-card-title {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.retro-card-meta {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.retro-cta {
+  background: #d97706; /* amber-600/orange vibe */
+  color: #ffffff;
+  border-radius: 14px;
+  height: var(--button-height);
+  padding: 0 var(--button-padding-x);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+  border: none;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-clip: padding-box;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  margin: var(--button-gap) var(--button-gap) 0 0;
+}
+
+/* Built-in spacing for buttons placed near others */
+.retro-cta + .retro-cta, .retro-cta + .retro-chip, .retro-chip + .retro-cta, .retro-chip + .retro-chip { margin-left: var(--button-gap); }
+
+.retro-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.28);
+  color: #0f172a;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.35);
+  transition: all .2s ease;
+  margin: var(--button-gap) var(--button-gap) 0 0;
+}
+
+.retro-cta:hover { background: #b45309; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.24); }
+.retro-cta:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(255,255,255,0.35), 0 6px 16px rgba(0,0,0,0.24); }
+
+/* Consistent spacing utilities for card layouts */
+.card-stack { display: grid; gap: var(--card-gap); }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: var(--card-gap); align-items: stretch; }
+.tile-row { display: flex; align-items: center; justify-content: space-between; gap: var(--button-gap); }

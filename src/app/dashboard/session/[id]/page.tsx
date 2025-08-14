@@ -4,7 +4,24 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Database } from '@/types/database'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { 
+  ArrowLeft,
+  User,
+  Camera, 
+  Palette, 
+  Calculator,
+  FileText,
+  CheckCircle,
+  ArrowRight,
+  Phone,
+  Mail,
+  MapPin,
+  Edit3,
+  Loader2
+} from 'lucide-react'
 import PhotoCapture from '@/components/PhotoCapture'
 import ClientInfoForm from '@/components/ClientInfoForm'
 import MockupGenerator from '@/components/MockupGenerator'
@@ -15,12 +32,12 @@ type Session = Database['public']['Tables']['sessions']['Row']
 type Estimate = Database['public']['Tables']['estimates']['Row']
 
 const WORKFLOW_STEPS = [
-  { id: 1, name: 'Client Info', status: 'draft' },
-  { id: 2, name: 'Photo Upload', status: 'photo_uploaded' },
-  { id: 3, name: 'AI Mockup', status: 'mockup_created' },
-  { id: 4, name: 'Estimate', status: 'estimate_generated' },
-  { id: 5, name: 'Contract', status: 'contract_signed' },
-  { id: 6, name: 'Complete', status: 'completed' }
+  { id: 1, name: 'Client Info', icon: User, status: 'draft' },
+  { id: 2, name: 'Photo Upload', icon: Camera, status: 'photo_uploaded' },
+  { id: 3, name: 'AI Mockup', icon: Palette, status: 'mockup_created' },
+  { id: 4, name: 'Estimate', icon: Calculator, status: 'estimate_generated' },
+  { id: 5, name: 'Contract', icon: FileText, status: 'contract_signed' },
+  { id: 6, name: 'Complete', icon: CheckCircle, status: 'completed' }
 ]
 
 export default function SessionPage() {
@@ -31,147 +48,153 @@ export default function SessionPage() {
   const [estimate, setEstimate] = useState<Estimate | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentStep, setCurrentStep] = useState(1)
+  const [isEditingClient, setIsEditingClient] = useState(false)
 
-  useEffect(() => {
-    async function fetchSession() {
-      const { data: sessionData, error: sessionError } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('id', sessionId)
-        .single()
-
-      if (sessionError) {
-        console.error('Error fetching session:', sessionError)
-        setLoading(false)
-        return
-      }
-
-      setSession(sessionData)
-
-      // Fetch estimate if exists
-      const { data: estimateData } = await supabase
-        .from('estimates')
-        .select('*')
-        .eq('session_id', sessionId)
-        .single()
-
-      if (estimateData) {
-        setEstimate(estimateData)
-      }
-
-      // Set current step based on session status
-      const statusToStep: { [key: string]: number } = {
-        'draft': 1,
-        'photo_uploaded': 2,
-        'mockup_created': 3,
-        'estimate_generated': 4,
-        'contract_signed': 5,
-        'completed': 6
-      }
-      setCurrentStep(statusToStep[sessionData.status || 'draft'] || 1)
-      setLoading(false)
-    }
-
-    fetchSession()
-  }, [sessionId])
-
-  const updateSession = async (updates: Partial<Session>) => {
-    const { data, error } = await supabase
+  const getSession = async () => {
+    const { data: sessionData, error } = await supabase
       .from('sessions')
-      .update(updates)
+      .select('*')
       .eq('id', sessionId)
-      .select()
       .single()
-
+    
     if (error) {
-      console.error('Error updating session:', error)
+      console.error('Error fetching session:', error)
       return
     }
-
-    setSession(data)
-  }
-
-  const handleStepClick = (stepId: number) => {
-    if (stepId <= getMaxClickableStep()) {
-      setCurrentStep(stepId)
+    
+    setSession(sessionData)
+    
+    // Get estimate if exists
+    const { data: estimateData } = await supabase
+      .from('estimates')
+      .select('*')
+      .eq('session_id', sessionId)
+      .single()
+    
+    if (estimateData) {
+      setEstimate(estimateData)
     }
+    
+    // Set current step based on session status
+    const stepIndex = WORKFLOW_STEPS.findIndex(step => step.status === sessionData.status)
+    setCurrentStep(stepIndex >= 0 ? stepIndex + 1 : 1)
+    
+    setLoading(false)
   }
 
-  const getMaxClickableStep = () => {
-    const statusToMaxStep: { [key: string]: number } = {
-      'draft': 1,
-      'photo_uploaded': 2,
-      'mockup_created': 3,
-      'estimate_generated': 4,
-      'contract_signed': 5,
-      'completed': 6
+  useEffect(() => {
+    if (sessionId) {
+      getSession()
     }
-    return statusToMaxStep[session?.status || 'draft'] || 1
+  }, [sessionId])
+
+  const getStepStatus = (stepNumber: number) => {
+    if (!session) return 'upcoming'
+    
+    // Determine completion based on session data
+    const completedSteps = new Set()
+    
+    // Step 1: Client Info - always completed if session exists
+    if (session.client_name && session.client_email) {
+      completedSteps.add(1)
+    }
+    
+    // Step 2: Photo Upload - completed if original_image_url exists
+    if (session.original_image_url) {
+      completedSteps.add(2)
+    }
+    
+    // Step 3: Mockup - completed if final_mockup_url exists
+    if (session.final_mockup_url) {
+      completedSteps.add(3)
+    }
+    
+    // Step 4: Estimate - completed if estimate exists
+    if (estimate) {
+      completedSteps.add(4)
+    }
+    
+    // Step 5: Contract - completed if contract is signed
+    if (estimate?.signed_at) {
+      completedSteps.add(5)
+    }
+    
+    // Step 6: Complete - completed if contract is signed
+    if (estimate?.signed_at) {
+      completedSteps.add(6)
+    }
+    
+    if (completedSteps.has(stepNumber)) return 'completed'
+    if (stepNumber === currentStep) return 'current'
+    return 'upcoming'
   }
 
-  const getStepStatus = (stepId: number) => {
-    const maxCompletedStep = getMaxClickableStep() - 1
-    if (stepId <= maxCompletedStep) return 'completed'
-    if (stepId === currentStep) return 'current'
-    return 'pending'
+  const handleStepClick = (stepNumber: number) => {
+    const stepStatus = getStepStatus(stepNumber)
+    // Allow navigation to completed steps, current step, and the next available step
+    if (stepStatus === 'completed' || stepStatus === 'current' || stepNumber <= currentStep + 1) {
+      setCurrentStep(stepNumber)
+    }
   }
 
   const renderStepContent = () => {
-    if (!session) return null
-
     switch (currentStep) {
       case 1:
         return (
           <ClientInfoStep 
             session={session} 
             onNext={() => setCurrentStep(2)}
-            onUpdateSession={updateSession}
+            onUpdateSession={setSession}
+            isEditing={isEditingClient}
+            onEditToggle={() => setIsEditingClient(!isEditingClient)}
           />
         )
       case 2:
         return (
           <PhotoUploadStep 
             session={session} 
-            onNext={() => setCurrentStep(3)}
-            onUpdateSession={updateSession}
+            onNext={() => setCurrentStep(3)} 
+            onBack={() => setCurrentStep(1)}
+            onUpdateSession={setSession}
           />
         )
       case 3:
-        return (
-          <MockupStep 
-            session={session} 
-            onNext={() => setCurrentStep(4)}
-            onUpdateSession={updateSession}
-          />
-        )
+        return <MockupStep session={session} onNext={() => setCurrentStep(4)} onBack={() => setCurrentStep(2)} />
       case 4:
         return (
           <EstimateStep 
             session={session} 
-            estimate={estimate}
-            onNext={() => setCurrentStep(5)}
-            onUpdateSession={updateSession}
-            onEstimateUpdate={setEstimate}
+            estimate={estimate} 
+            onNext={() => setCurrentStep(5)} 
+            onBack={() => setCurrentStep(3)}
+            onEstimateCreated={setEstimate}
           />
         )
       case 5:
         return (
           <ContractStep 
             session={session} 
-            estimate={estimate}
-            onNext={() => setCurrentStep(6)}
-            onUpdateSession={updateSession}
+            estimate={estimate} 
+            onNext={() => setCurrentStep(6)} 
+            onBack={() => setCurrentStep(4)}
+            onContractSigned={() => {
+              // Refresh session data to reflect signed status
+              getSession()
+            }}
           />
         )
       case 6:
+        return <CompleteStep session={session} onBack={() => setCurrentStep(5)} />
+      default:
         return (
-          <CompleteStep 
+          <ClientInfoStep 
             session={session} 
-            estimate={estimate}
+            onNext={() => setCurrentStep(2)}
+            onUpdateSession={setSession}
+            isEditing={isEditingClient}
+            onEditToggle={() => setIsEditingClient(!isEditingClient)}
           />
         )
-      default:
-        return null
     }
   }
 
@@ -179,8 +202,8 @@ export default function SessionPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="vercel-spinner mx-auto mb-4"></div>
-          <p className="vercel-muted">Loading session...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-green-700">Loading Session...</p>
         </div>
       </div>
     )
@@ -188,114 +211,109 @@ export default function SessionPage() {
 
   if (!session) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="vercel-card text-center max-w-md">
-          <h2 className="vercel-h3 text-accent-red mb-4">Session Not Found</h2>
-          <p className="vercel-muted mb-6">The session you're looking for doesn't exist.</p>
-          <button 
-            onClick={() => window.location.href = '/dashboard'}
-            className="vercel-btn vercel-btn-primary"
-          >
-            Return to Dashboard
-          </button>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Session Not Found</h1>
+          <Button onClick={() => window.location.href = '/dashboard'}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border bg-white">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => window.location.href = '/dashboard'}
-                className="vercel-btn vercel-btn-ghost"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Dashboard
+    <div className="px-0">
+      <div className="space-y-8 card-stack page-gap">
+        {/* Page header styled */}
+        <div className="retro-card-tile section-gap-bottom">
+          <div className="grid grid-cols-3 items-center">
+            <div className="flex">
+              <button onClick={() => (window.location.href = '/dashboard')} className="retro-chip active">
+                <ArrowLeft className="w-4 h-4 mr-1" /> Dashboard
               </button>
-              <div>
-                <h1 className="vercel-h3 text-foreground">{session.client_name}</h1>
-                <p className="vercel-muted">{session.client_address || 'Address not set'}</p>
-              </div>
             </div>
-            <div className="vercel-mono">
-              Session #{session.id.slice(0, 8).toUpperCase()}
+            <div className="text-center">
+              <h1 className="retro-card-title text-base">{session.client_name || 'New Client'}</h1>
+              <p className="retro-card-meta">{session.client_address || 'Address not set'}</p>
             </div>
+            <div className="flex justify-end"><span className="chip-sm" aria-hidden="true" /></div>
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-6 py-8 max-w-6xl">
-        {/* Progress */}
-        <div className="mb-12">
-          <h2 className="vercel-h3 text-foreground mb-8">Workflow Progress</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
-            {WORKFLOW_STEPS.map((step, index) => {
-              const retroColors = [
-                { bg: 'bg-accent-teal', text: 'text-accent-teal', bgLight: 'bg-accent-teal/8' },
-                { bg: 'bg-accent-orange', text: 'text-accent-orange', bgLight: 'bg-accent-orange/8' },
-                { bg: 'bg-accent-purple', text: 'text-accent-purple', bgLight: 'bg-accent-purple/8' },
-                { bg: 'bg-accent-green', text: 'text-accent-green', bgLight: 'bg-accent-green/8' },
-                { bg: 'bg-accent-red', text: 'text-accent-red', bgLight: 'bg-accent-red/8' },
-                { bg: 'bg-accent-teal', text: 'text-accent-teal', bgLight: 'bg-accent-teal/8' }
-              ]
-              
-              const colorScheme = retroColors[index]
-              const stepStatus = getStepStatus(step.id)
-              const isClickable = step.id <= getMaxClickableStep()
-              
-              return (
-                <div 
-                  key={step.id}
-                  className={`p-6 rounded-2xl transition-all duration-200 cursor-pointer ${
-                    stepStatus === 'completed' 
-                      ? `${colorScheme.bgLight} border border-gray-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]` 
-                      : stepStatus === 'current' 
-                        ? `${colorScheme.bgLight} border border-gray-200 shadow-md ring-1 ring-gray-200` 
-                        : `bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-sm ${isClickable ? '' : 'opacity-50'}`
-                  } ${isClickable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
-                  onClick={() => isClickable && handleStepClick(step.id)}
-                >
-                  <div className="text-center">
-                    <div className={`w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center font-mono text-sm font-semibold ${
-                      stepStatus === 'completed' 
-                        ? `${colorScheme.bg} text-white shadow-sm` 
-                        : stepStatus === 'current' 
-                          ? `${colorScheme.bg} text-white shadow-sm` 
-                          : 'bg-gray-200 text-gray-500'
-                    }`}>
-                      {stepStatus === 'completed' ? '✓' : step.id}
-                    </div>
-                    <h3 className={`font-medium text-sm mb-3 ${
-                      stepStatus === 'completed' || stepStatus === 'current' 
-                        ? colorScheme.text 
-                        : 'text-gray-500'
-                    }`}>
-                      {step.name}
-                    </h3>
-                    <span className={`inline-block px-3 py-1 rounded-lg text-xs font-medium ${
-                      stepStatus === 'completed' 
-                        ? `${colorScheme.bg} text-white` 
-                        : stepStatus === 'current' 
-                          ? `${colorScheme.bgLight} ${colorScheme.text}` 
-                          : 'bg-gray-100 text-gray-500'
-                    }`}>
-                      {stepStatus === 'completed' ? 'Complete' :
-                       stepStatus === 'current' ? 'Current' : 'Pending'}
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
+        {/* Progress Steps */}
+        <div className="retro-card-tile section-gap-bottom">
+          <div className="mb-3">
+            <h2 className="retro-card-title">Workflow Progress</h2>
+            <p className="retro-card-meta">Follow the steps to complete the session</p>
           </div>
+            <div className="flex items-center justify-between overflow-x-auto">
+              {WORKFLOW_STEPS.map((step, index) => {
+                const stepStatus = getStepStatus(step.id)
+                const isClickable = stepStatus === 'completed' || stepStatus === 'current' || step.id <= currentStep + 1
+                
+                return (
+                  <div key={step.id} className="flex items-center min-w-0">
+                    <div className="flex flex-col items-center min-w-max">
+                      {/* Icon - not clickable, just visual indicator */}
+                      <div 
+                        className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${
+                          stepStatus === 'completed' 
+                            ? 'bg-green-600 text-white shadow-lg' 
+                            : stepStatus === 'current'
+                            ? 'bg-blue-600 text-white shadow-lg'
+                            : isClickable
+                            ? 'bg-gray-300 text-gray-600'
+                            : 'bg-gray-200 text-gray-400'
+                        }`}
+                      >
+                        {stepStatus === 'completed' ? (
+                          <CheckCircle className="w-6 h-6" />
+                        ) : (
+                          <step.icon className="w-5 h-5" />
+                        )}
+                      </div>
+                      
+                      {/* Clickable step name */}
+                      <div className="mt-2 text-center">
+                        <button
+                          onClick={() => isClickable && handleStepClick(step.id)}
+                          disabled={!isClickable}
+                          className={`text-xs font-medium transition-all duration-200 ${
+                            isClickable 
+                              ? stepStatus === 'completed'
+                                ? 'text-green-600 hover:text-green-800 cursor-pointer hover:underline'
+                                : stepStatus === 'current'
+                                ? 'text-blue-600 hover:text-blue-800 cursor-pointer hover:underline'
+                                : 'text-gray-600 hover:text-gray-800 cursor-pointer hover:underline'
+                              : 'text-gray-400 cursor-not-allowed'
+                          }`}
+                          title={isClickable ? `Go to ${step.name}` : `${step.name} - Not yet available`}
+                        >
+                          {step.name}
+                        </button>
+                        {stepStatus === 'completed' && (
+                          <p className="text-xs text-green-500 font-medium mt-1">✓ Complete</p>
+                        )}
+                        {/* Remove explicit current bullet label for cleaner UI */}
+                      </div>
+                    </div>
+                    {index < WORKFLOW_STEPS.length - 1 && (
+                      <div className="flex items-center mx-4">
+                        <ArrowRight className={`w-4 h-4 ${
+                          stepStatus === 'completed' ? 'text-green-400' : 'text-gray-300'
+                        }`} />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
         </div>
 
         {/* Step Content */}
-        <div>
+        <div className="mb-6 card-stack section-gap-bottom">
           {renderStepContent()}
         </div>
       </div>
@@ -308,45 +326,29 @@ function ClientInfoStep({
   session, 
   onNext, 
   onUpdateSession, 
+  isEditing, 
+  onEditToggle 
 }: { 
-  session: Session
+  session: Session | null
   onNext: () => void
-  onUpdateSession: (updates: Partial<Session>) => void
+  onUpdateSession: (session: Session) => void
+  isEditing: boolean
+  onEditToggle: () => void
 }) {
-  const [isEditing, setIsEditing] = useState(true) // Start in editing mode for new sessions
-  
-  const handleUpdate = (updatedSession: Session) => {
-    onUpdateSession(updatedSession)
-    // If this is the first time setting client info, allow proceeding
-    if (updatedSession.client_name && updatedSession.client_name !== 'New Client') {
-      setIsEditing(false)
-    }
-  }
-
-  const canProceed = session.client_name && session.client_name !== 'New Client'
+  if (!session) return null
 
   return (
-    <div className="vercel-card">
-      <div className="mb-6">
-        <h2 className="vercel-h3 text-foreground mb-2">Client Information</h2>
-        <p className="vercel-muted">Enter your client's contact details and project location</p>
-      </div>
-      
-      <ClientInfoForm 
+    <div className="space-y-4">
+      <ClientInfoForm
         session={session}
-        onUpdate={handleUpdate}
+        onUpdate={onUpdateSession}
         isEditing={isEditing}
-        onEditToggle={() => setIsEditing(!isEditing)}
+        onEditToggle={onEditToggle}
       />
-      
-      {canProceed && !isEditing && (
-        <div className="mt-8 pt-6 border-t border-border">
-          <button
-            onClick={onNext}
-            className="vercel-btn vercel-btn-teal"
-          >
-            Continue to Photo Upload
-            <ArrowRight className="w-4 h-4 ml-2" />
+      {!isEditing && (
+        <div className="flex justify-end">
+          <button onClick={onNext} className="retro-cta">
+            Next: Upload Photo <ArrowRight className="w-4 h-4 ml-2" />
           </button>
         </div>
       )}
@@ -357,239 +359,301 @@ function ClientInfoStep({
 function PhotoUploadStep({ 
   session, 
   onNext, 
-  onUpdateSession,
+  onBack, 
+  onUpdateSession 
 }: { 
-  session: Session
+  session: Session | null
   onNext: () => void
-  onUpdateSession: (updates: Partial<Session>) => void
+  onBack: () => void
+  onUpdateSession: (session: Session) => void
 }) {
-  const canProceed = session.original_image_url
+  if (!session) return null
 
   const handlePhotoUploaded = (url: string) => {
-    onUpdateSession({ original_image_url: url })
+    // Update the session with the new photo URL
+    onUpdateSession({
+      ...session,
+      original_image_url: url
+    })
   }
 
   return (
-    <div className="vercel-card">
-      <div className="mb-6">
-        <h2 className="vercel-h3 text-foreground mb-2">Photo Upload</h2>
-        <p className="vercel-muted">Capture or upload photos of the landscaping area</p>
+    <div className="retro-card-tile">
+      <div className="mb-3">
+        <h3 className="retro-card-title text-base flex items-center">
+          <Camera className="w-5 h-5 mr-2" />
+          Property Photo
+        </h3>
+        <p className="retro-card-meta">Capture or upload photos of the client's property</p>
       </div>
-      
-      <PhotoCapture 
-        sessionId={session.id}
-        onPhotoUploaded={handlePhotoUploaded}
-        existingPhotoUrl={session.original_image_url}
-      />
-      
-      {canProceed && (
-        <div className="mt-8 pt-6 border-t border-border">
+      <div className="space-y-6">
+        <PhotoCapture
+          sessionId={session.id}
+          onPhotoUploaded={handlePhotoUploaded}
+          existingPhotoUrl={session.original_image_url}
+        />
+        <div className="tile-row mt-6">
+          <button className="retro-chip active mr-2" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4 mr-1" /> Back
+          </button>
           <button
             onClick={onNext}
-            className="vercel-btn vercel-btn-teal"
+            className="retro-cta ml-2"
+            disabled={!session.original_image_url}
+            style={{ opacity: session.original_image_url ? 1 : 0.5, cursor: session.original_image_url ? 'pointer' : 'not-allowed' }}
           >
-            Continue to AI Mockup
-            <ArrowRight className="w-4 h-4 ml-2" />
+            Next: Create Mockup <ArrowRight className="w-4 h-4 ml-2" />
           </button>
         </div>
-      )}
+      </div>
     </div>
   )
 }
 
-function MockupStep({ 
-  session, 
-  onNext, 
-  onUpdateSession,
-}: { 
-  session: Session
-  onNext: () => void
-  onUpdateSession: (updates: Partial<Session>) => void
-}) {
-  const canProceed = session.final_mockup_url
+function MockupStep({ session, onNext, onBack }: { session: Session | null, onNext: () => void, onBack: () => void }) {
+  if (!session) return null
 
   const handleMockupGenerated = (mockup: any) => {
-    onUpdateSession({ final_mockup_url: mockup.image_url })
+    // Mockup generated successfully, could show a success message
+    console.log('Mockup generated:', mockup)
   }
 
   return (
-    <div className="vercel-card">
-      <div className="mb-6">
-        <h2 className="vercel-h3 text-foreground mb-2">AI Mockup Generation</h2>
-        <p className="vercel-muted">Generate landscape design mockups using AI</p>
-      </div>
-      
-      <MockupGenerator 
+    <div className="space-y-6">
+      <MockupGenerator
         session={session}
         onMockupGenerated={handleMockupGenerated}
       />
       
-      {canProceed && (
-        <div className="mt-8 pt-6 border-t border-border">
-          <button
-            onClick={onNext}
-            className="vercel-btn vercel-btn-orange"
-          >
-            Continue to Estimate
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </button>
-        </div>
-      )}
+      <div className="flex justify-between mt-24">
+        <Button variant="outline" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <Button 
+          onClick={onNext} 
+          className="bg-green-600 hover:bg-green-700"
+          disabled={!session.final_mockup_url}
+        >
+          Next: Generate Estimate
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
     </div>
   )
 }
 
 function EstimateStep({ 
   session, 
-  estimate,
+  estimate, 
   onNext, 
-  onUpdateSession,
-  onEstimateUpdate,
+  onBack,
+  onEstimateCreated 
 }: { 
-  session: Session
+  session: Session | null
   estimate: Estimate | null
   onNext: () => void
-  onUpdateSession: (updates: Partial<Session>) => void
-  onEstimateUpdate: (estimate: Estimate) => void
+  onBack: () => void
+  onEstimateCreated: (estimate: Estimate) => void
 }) {
-  const canProceed = estimate && estimate.final_amount
+  if (!session) return null
 
   const handleEstimateCreated = (newEstimate: any) => {
-    onEstimateUpdate(newEstimate)
+    onEstimateCreated(newEstimate)
   }
 
   return (
-    <div className="vercel-card">
-      <div className="mb-6">
-        <h2 className="vercel-h3 text-foreground mb-2">Project Estimate</h2>
-        <p className="vercel-muted">Create detailed estimates for the landscaping project</p>
-      </div>
-      
-      <EstimateBuilder 
+    <div className="space-y-6">
+      <EstimateBuilder
         session={session}
         existingEstimate={estimate}
         onEstimateCreated={handleEstimateCreated}
       />
       
-      {canProceed && (
-        <div className="mt-8 pt-6 border-t border-border">
-          <button
-            onClick={onNext}
-            className="vercel-btn vercel-btn-green"
-          >
-            Continue to Contract
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </button>
-        </div>
-      )}
+      <div className="flex justify-between mt-12">
+        <Button variant="outline" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <Button 
+          onClick={onNext} 
+          className="bg-green-600 hover:bg-green-700"
+          disabled={!estimate}
+        >
+          Next: Generate Contract
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
     </div>
   )
 }
 
 function ContractStep({ 
   session, 
-  estimate,
+  estimate, 
   onNext, 
-  onUpdateSession,
+  onBack,
+  onContractSigned 
 }: { 
-  session: Session
+  session: Session | null
   estimate: Estimate | null
   onNext: () => void
-  onUpdateSession: (updates: Partial<Session>) => void
+  onBack: () => void
+  onContractSigned: () => void
 }) {
-  if (!estimate) {
+  if (!session || !estimate) {
     return (
-      <div className="vercel-card">
-        <div className="text-center py-8">
-          <h3 className="vercel-h4 text-accent-red mb-2">No Estimate Available</h3>
-          <p className="vercel-muted">Please complete the estimate step first.</p>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-8 text-center">
+          <p className="text-red-500">Session or estimate data is missing.</p>
+          <Button variant="outline" onClick={onBack} className="mt-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+        </CardContent>
+      </Card>
     )
   }
 
-  const handleContractSigned = () => {
-    onUpdateSession({ status: 'contract_signed' })
-  }
-
   return (
-    <div className="vercel-card">
-      <div className="mb-6">
-        <h2 className="vercel-h3 text-foreground mb-2">Contract Signing</h2>
-        <p className="vercel-muted">Generate and sign the project contract</p>
-      </div>
-      
-      <ContractGenerator 
+    <div className="space-y-6">
+      <ContractGenerator
         session={session}
         estimate={estimate}
-        onContractSigned={handleContractSigned}
+        onContractSigned={onContractSigned}
       />
       
-      <div className="mt-8 pt-6 border-t border-border">
-        <button
-          onClick={onNext}
-          className="vercel-btn vercel-btn-purple"
+      <div className="flex justify-between mt-12">
+        <Button variant="outline" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <Button 
+          onClick={onNext} 
+          className="bg-green-600 hover:bg-green-700"
         >
           Complete Session
           <ArrowRight className="w-4 h-4 ml-2" />
-        </button>
+        </Button>
       </div>
     </div>
   )
 }
 
-function CompleteStep({ 
-  session, 
-  estimate,
-}: { 
-  session: Session
-  estimate: Estimate | null
-}) {
+function CompleteStep({ session, onBack }: { session: Session | null, onBack: () => void }) {
+  const [isCompleting, setIsCompleting] = useState(false)
+  const [isCompleted, setIsCompleted] = useState(session?.status === 'completed')
+
+  const completeSession = async () => {
+    if (!session) return
+
+    setIsCompleting(true)
+
+    try {
+      // Update session status to completed
+      const { error } = await supabase
+        .from('sessions')
+        .update({ 
+          status: 'completed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', session.id)
+
+      if (error) {
+        throw error
+      }
+
+      // Send completion email to client
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'project_complete',
+            sessionId: session.id
+          })
+        })
+      } catch (emailError) {
+        console.error('Error sending completion email:', emailError)
+      }
+
+      setIsCompleted(true)
+
+    } catch (error) {
+      console.error('Error completing session:', error)
+      alert('Failed to complete session')
+    } finally {
+      setIsCompleting(false)
+    }
+  }
+
   return (
-    <div className="vercel-card text-center">
-      <div className="w-16 h-16 bg-accent-green rounded-full flex items-center justify-center mx-auto mb-6">
-        <span className="text-white text-2xl">✓</span>
-      </div>
-      
-      <h2 className="vercel-h2 text-foreground mb-4">Session Complete!</h2>
-      <p className="vercel-lead text-muted-foreground mb-8">
-        The landscaping project for {session.client_name} has been successfully completed.
-      </p>
-      
-      {estimate && (
-        <div className="vercel-card bg-secondary text-left max-w-md mx-auto mb-8">
-          <h3 className="vercel-h4 text-foreground mb-4">Project Summary</h3>
-                      <div className="space-y-2 vercel-muted">
-              <div className="flex justify-between">
-                <span>Client:</span>
-                <span className="font-medium">{session.client_name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Total Amount:</span>
-                <span className="font-medium">${estimate.final_amount?.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Status:</span>
-                <span className="vercel-badge vercel-badge-success">Completed</span>
-              </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <CheckCircle className="w-5 h-5 mr-2" />
+          Session Complete
+        </CardTitle>
+        <CardDescription>
+          {isCompleted ? 'Session has been completed!' : 'Mark this session as completed'}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isCompleted ? (
+          <div className="text-center py-12">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">🎉 Session Completed!</h3>
+            <p className="text-gray-500 mb-6">All tasks completed and client notified</p>
+            <div className="space-y-2">
+              <p className="text-sm text-green-600">✓ Contract signed and saved</p>
+              <p className="text-sm text-green-600">✓ Client completion email sent</p>
+              <p className="text-sm text-green-600">✓ Session marked as completed</p>
+              <p className="text-sm text-green-600">✓ Ready for project scheduling</p>
             </div>
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-10 h-10 text-green-600" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Ready to Complete</h3>
+            <p className="text-gray-500 mb-6">
+              Mark this session as completed to send final notifications and wrap up the process
+            </p>
+            <Button
+              onClick={completeSession}
+              disabled={isCompleting}
+              className="bg-green-600 hover:bg-green-700"
+              size="lg"
+            >
+              {isCompleting ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Completing Session...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-5 h-5 mr-2" />
+                  Complete Session
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+        
+      <div className="flex justify-between mt-12">
+          <Button variant="outline" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          <Button 
+            onClick={() => window.location.href = '/dashboard'} 
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Return to Dashboard
+          </Button>
         </div>
-      )}
-      
-      <div className="flex gap-4 justify-center">
-        <button
-          onClick={() => window.location.href = '/dashboard'}
-          className="vercel-btn vercel-btn-primary"
-        >
-          Return to Dashboard
-        </button>
-        <button
-          onClick={() => window.location.href = `/dashboard/session/${session.id}`}
-          className="vercel-btn vercel-btn-secondary"
-        >
-          View Session Details
-        </button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
