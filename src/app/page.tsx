@@ -1,103 +1,199 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import { Leaf } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [email, setEmail] = useState('')
+  const [authLoading, setAuthLoading] = useState(false)
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthLoading(true)
+    setMessage(null)
+
+    try {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/dashboard`,
+          },
+        })
+        if (error) throw error
+        setMessage({ type: 'success', text: 'Check your email for the confirmation link!' })
+      } else {
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/dashboard`,
+          },
+        })
+        if (error) throw error
+        setMessage({ type: 'success', text: 'Check your email for the login link!' })
+      }
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message })
+    } finally {
+      setAuthLoading(false)
+    }
+  }
+
+  return (
+    <div className="container mx-auto px-6 py-12 max-w-md">
+      {/* Hero Section */}
+      <div className="text-center mb-12">
+        <div className="w-20 h-20 bg-accent-teal rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <Leaf className="w-10 h-10 text-white" />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        
+        <h1 className="vercel-h1 text-foreground mb-4">
+          The e5000
+        </h1>
+        <div className="mb-6">
+          <p className="vercel-large text-foreground mb-2">Gardens of Babylon</p>
+          <p className="vercel-muted">Professional Landscaping System</p>
+        </div>
+      </div>
+
+      {/* Login Card */}
+      <Card className="animate-in fade-in-50 duration-300">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">
+            {isSignUp ? 'Join Our Team' : 'Sales Rep Access'}
+          </CardTitle>
+          <CardDescription>
+            {isSignUp 
+              ? 'Become part of the Gardens of Babylon family' 
+              : 'Access your landscaping tools and client sessions'
+            }
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          {/* Auth Toggle */}
+          <div className="flex rounded-lg border bg-muted p-1 mb-6">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsSignUp(false)}
+              className={`flex-1 ${
+                !isSignUp 
+                  ? 'bg-background text-foreground shadow-sm' 
+                  : 'text-muted-foreground'
+              }`}
+            >
+              Sign In
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsSignUp(true)}
+              className={`flex-1 ${
+                isSignUp 
+                  ? 'bg-background text-foreground shadow-sm' 
+                  : 'text-muted-foreground'
+              }`}
+            >
+              Sign Up
+            </Button>
+          </div>
+
+          {/* Message Alert */}
+          {message && (
+            <Card className={`mb-6 border-l-4 ${
+              message.type === 'success' 
+                ? 'border-accent-green bg-accent-green/5' 
+                : 'border-accent-red bg-accent-red/5'
+            }`}>
+              <CardContent className="p-4">
+                <p className={`text-sm ${
+                  message.type === 'success' ? 'text-accent-green' : 'text-accent-red'
+                }`}>
+                  {message.text}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Auth Form */}
+          <form onSubmit={handleAuth} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={authLoading}
+              className="w-full"
+              variant={isSignUp ? 'purple' : 'teal'}
+            >
+              {authLoading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                  <span>Processing...</span>
+                </div>
+              ) : (
+                isSignUp ? 'Create Account' : 'Send Login Link'
+              )}
+            </Button>
+          </form>
+
+          <div className="text-center mt-6">
+            <p className="text-sm text-muted-foreground">
+              {isSignUp 
+                ? 'By signing up, you agree to our terms of service' 
+                : 'We\'ll send you a secure login link via email'
+              }
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Features Section */}
+      <div className="mt-12 grid gap-6">
+        <Card className="text-center bg-accent-teal/5 border-accent-teal/20">
+          <CardContent className="p-6">
+            <CardTitle className="text-lg text-accent-teal mb-2">Client Management</CardTitle>
+            <CardDescription>
+              Track client information and project progress
+            </CardDescription>
+          </CardContent>
+        </Card>
+        
+        <Card className="text-center bg-accent-orange/5 border-accent-orange/20">
+          <CardContent className="p-6">
+            <CardTitle className="text-lg text-accent-orange mb-2">AI-Powered Mockups</CardTitle>
+            <CardDescription>
+              Generate landscape designs with artificial intelligence
+            </CardDescription>
+          </CardContent>
+        </Card>
+        
+        <Card className="text-center bg-accent-green/5 border-accent-green/20">
+          <CardContent className="p-6">
+            <CardTitle className="text-lg text-accent-green mb-2">Instant Estimates</CardTitle>
+            <CardDescription>
+              Create professional estimates and contracts on-site
+            </CardDescription>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  );
+  )
 }
