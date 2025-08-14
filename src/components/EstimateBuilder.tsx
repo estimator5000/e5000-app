@@ -214,42 +214,35 @@ export default function EstimateBuilder({ session, existingEstimate, onEstimateC
 
   return (
     <div className="space-y-6">
-      {/* Category Filter */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Calculator className="w-5 h-5 mr-2" />
-            Build Estimate
-          </CardTitle>
-          <CardDescription>
-            Select landscaping items and quantities to build your estimate
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {CATEGORIES.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category.id)}
-              >
-                {category.name}
-              </Button>
-            ))}
-          </div>
-          
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search items..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Category Filter (Styled like other retro cards) */}
+      <div className="retro-card-tile">
+        <div className="mb-4">
+          <h3 className="retro-card-title text-base flex items-center">
+            <Calculator className="w-5 h-5 mr-2" /> Build Estimate
+          </h3>
+          <p className="retro-card-meta">Select landscaping items and quantities to build your estimate</p>
+        </div>
+        <div className="chip-group mb-2">
+          {CATEGORIES.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id)}
+              className={`retro-chip ${selectedCategory === category.id ? 'active' : ''}`}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input
+            className="vercel-input pl-10"
+            placeholder="Search items..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
       {/* Available Items */}
       <Card>
@@ -265,26 +258,25 @@ export default function EstimateBuilder({ session, existingEstimate, onEstimateC
           ) : (
             <div className="grid gap-3">
               {filteredItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <h4 className="font-medium">{item.name}</h4>
-                      <Badge variant="outline" className="text-xs">
-                        {item.category}
-                      </Badge>
+                <div key={item.id} className="retro-card-tile">
+                  <div className="tile-row">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="retro-card-title">{item.name}</h4>
+                        <span className="chip-sm">{item.category}</span>
+                      </div>
+                      <p className="retro-card-meta mt-1">{item.description}</p>
+                      <p className="text-sm font-medium text-green-600 mt-1">
+                        ${item.low_price.toFixed(2)} - ${item.high_price.toFixed(2)} per {item.unit}
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-                    <p className="text-sm font-medium text-green-600 mt-1">
-                      ${item.low_price.toFixed(2)} - ${item.high_price.toFixed(2)} per {item.unit}
-                    </p>
+                    <button
+                      onClick={() => addItemToEstimate(item)}
+                      className="retro-cta"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
                   </div>
-                  <Button
-                    onClick={() => addItemToEstimate(item)}
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
                 </div>
               ))}
               
@@ -300,136 +292,121 @@ export default function EstimateBuilder({ session, existingEstimate, onEstimateC
 
       {/* Current Estimate */}
       {estimateItems.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Current Estimate</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="retro-card-tile">
+          <h3 className="retro-card-title text-base mb-2">Current Estimate</h3>
+          <div className="space-y-3">
             {estimateItems.map((item) => (
-              <div key={item.id} className="flex items-center space-x-4 p-3 border rounded-lg">
-                <div className="flex-1">
-                  <h4 className="font-medium">{item.name}</h4>
-                  <p className="text-sm text-gray-600">{item.description}</p>
+              <div key={item.id} className="retro-card-tile">
+                <div className="tile-row items-center">
+                  <div className="flex-1">
+                    <h4 className="retro-card-title">{item.name}</h4>
+                    <p className="retro-card-meta">{item.description}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button className="retro-chip" onClick={() => updateItemQuantity(item.id, item.quantity - 1)}>
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="w-8 text-center">{item.quantity}</span>
+                    <button className="retro-chip" onClick={() => updateItemQuantity(item.id, item.quantity + 1)}>
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-gray-400" />
+                    <input
+                      type="number"
+                      value={item.selectedPrice}
+                      onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
+                      className="vercel-input w-24 text-center"
+                      step="0.01"
+                      min={item.low_price}
+                      max={item.high_price}
+                    />
+                    <span className="retro-card-meta">per {item.unit}</span>
+                  </div>
+                  <div className="font-medium min-w-[80px] text-right">
+                    ${(item.quantity * item.selectedPrice).toFixed(2)}
+                  </div>
+                  <button className="retro-chip" onClick={() => removeItemFromEstimate(item.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
-                  >
-                    <Minus className="w-3 h-3" />
-                  </Button>
-                  <span className="w-8 text-center">{item.quantity}</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
-                  >
-                    <Plus className="w-3 h-3" />
-                  </Button>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="w-4 h-4 text-gray-400" />
-                  <Input
-                    type="number"
-                    value={item.selectedPrice}
-                    onChange={(e) => updateItemPrice(item.id, parseFloat(e.target.value) || 0)}
-                    className="w-20 text-center"
-                    step="0.01"
-                    min={item.low_price}
-                    max={item.high_price}
-                  />
-                  <span className="text-sm text-gray-500">per {item.unit}</span>
-                </div>
-
-                <div className="font-medium min-w-[80px] text-right">
-                  ${(item.quantity * item.selectedPrice).toFixed(2)}
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removeItemFromEstimate(item.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
               </div>
             ))}
+          </div>
 
-            {/* Pricing Adjustments */}
-            <div className="border-t pt-4 space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="discount">Discount (%)</Label>
-                  <Input
-                    id="discount"
-                    type="number"
-                    value={discountPercent}
-                    onChange={(e) => setDiscountPercent(parseFloat(e.target.value) || 0)}
-                    min="0"
-                    max="100"
-                    step="0.1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="tax">Tax Rate (%)</Label>
-                  <Input
-                    id="tax"
-                    type="number"
-                    value={taxPercent}
-                    onChange={(e) => setTaxPercent(parseFloat(e.target.value) || 0)}
-                    min="0"
-                    max="50"
-                    step="0.01"
-                  />
-                </div>
+          {/* Pricing Adjustments */}
+          <div className="retro-card-tile retro-card-gray">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="discount" className="retro-card-meta">Discount (%)</label>
+                <input
+                  id="discount"
+                  type="number"
+                  value={discountPercent}
+                  onChange={(e) => setDiscountPercent(parseFloat(e.target.value) || 0)}
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  className="vercel-input"
+                />
               </div>
-
-              {/* Totals */}
-              <div className="space-y-2 pt-4 border-t">
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span>${totals.subtotal.toFixed(2)}</span>
-                </div>
-                {discountPercent > 0 && (
-                  <div className="flex justify-between text-red-600">
-                    <span>Discount ({discountPercent}%):</span>
-                    <span>-${totals.discountAmount.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span>Tax ({taxPercent}%):</span>
-                  <span>${totals.taxAmount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                  <span>Total:</span>
-                  <span>${totals.total.toFixed(2)}</span>
-                </div>
+              <div>
+                <label htmlFor="tax" className="retro-card-meta">Tax Rate (%)</label>
+                <input
+                  id="tax"
+                  type="number"
+                  value={taxPercent}
+                  onChange={(e) => setTaxPercent(parseFloat(e.target.value) || 0)}
+                  min={0}
+                  max={50}
+                  step={0.01}
+                  className="vercel-input"
+                />
               </div>
-
-              <Button
-                onClick={saveEstimate}
-                disabled={saving}
-                className="w-full bg-green-600 hover:bg-green-700"
-                size="lg"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Saving Estimate...
-                  </>
-                ) : (
-                  <>
-                    <Calculator className="w-4 h-4 mr-2" />
-                    Save Estimate
-                  </>
-                )}
-              </Button>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Totals */}
+            <div className="space-y-2 pt-4">
+              <div className="tile-row">
+                <span className="retro-card-meta">Subtotal</span>
+                <span>${totals.subtotal.toFixed(2)}</span>
+              </div>
+              {discountPercent > 0 && (
+                <div className="tile-row text-red-600">
+                  <span>Discount ({discountPercent}%)</span>
+                  <span>-${totals.discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="tile-row">
+                <span className="retro-card-meta">Tax ({taxPercent}%)</span>
+                <span>${totals.taxAmount.toFixed(2)}</span>
+              </div>
+              <div className="tile-row text-lg font-bold pt-2">
+                <span>Total</span>
+                <span>${totals.total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={saveEstimate}
+              disabled={saving}
+              className="retro-cta w-full mt-4"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving Estimate...
+                </>
+              ) : (
+                <>
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Save Estimate
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

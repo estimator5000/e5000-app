@@ -112,8 +112,8 @@ export default function Home() {
 
       {/* Feature Highlights */}
       <div className="max-w-5xl mx-auto card-grid">
-        {[{t:'Client Management',d:'Track client information and project progress'},{t:'AI-Powered Mockups',d:'Generate landscape designs with AI'},{t:'Instant Estimates',d:'Create professional estimates on-site'}].map((f) => (
-          <div key={f.t} className="retro-card-tile">
+        {[{t:'Client Management',d:'Track client information and project progress'},{t:'AI-Powered Mockups',d:'Generate landscape designs with AI'},{t:'Instant Estimates',d:'Create professional estimates on-site'},{t:'Sign Contract',d:'Generate and sign contracts digitally'}].map((f) => (
+          <div key={f.t} className="retro-card-tile landing-card">
             <div className="retro-card-image mb-3"><div className="w-10 h-10 bg-white rounded-lg" /></div>
             <h3 className="retro-card-title mb-1">{f.t}</h3>
             <p className="retro-card-meta">{f.d}</p>

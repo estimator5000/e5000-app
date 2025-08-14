@@ -15,6 +15,7 @@ interface PhotoCaptureProps {
 export default function PhotoCapture({ sessionId, onPhotoUploaded, existingPhotoUrl }: PhotoCaptureProps) {
   const [capturedImage, setCapturedImage] = useState<string | null>(existingPhotoUrl || null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -189,6 +190,27 @@ export default function PhotoCapture({ sessionId, onPhotoUploaded, existingPhoto
     }
   }
 
+  const removeExistingPhoto = async () => {
+    if (!existingPhotoUrl) return
+    setIsDeleting(true)
+    try {
+      const res = await fetch('/api/delete-photo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, imageUrl: existingPhotoUrl })
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to delete photo')
+      onPhotoUploaded('')
+      setCapturedImage(null)
+    } catch (e: any) {
+      console.error('Failed to delete existing photo', e)
+      alert(e?.message || 'Failed to delete photo')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Camera View */}
@@ -260,6 +282,24 @@ export default function PhotoCapture({ sessionId, onPhotoUploaded, existingPhoto
           >
             <Upload className="w-5 h-5 mr-2" /> Upload Photo
           </button>
+          {existingPhotoUrl && (
+            <div className="flex items-center gap-3 mt-2">
+              <button
+                className="retro-chip"
+                onClick={() => {
+                  const a = document.createElement('a')
+                  a.href = existingPhotoUrl
+                  a.target = '_blank'
+                  a.click()
+                }}
+              >
+                Open Current Photo
+              </button>
+              <button className="retro-cta" onClick={removeExistingPhoto} disabled={isDeleting}>
+                {isDeleting ? 'Removing…' : 'Remove Photo'}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

@@ -34,6 +34,9 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
   const [isSigning, setIsSigning] = useState(false)
   const [signatureData, setSignatureData] = useState<string | null>(null)
   const [isContractSigned, setIsContractSigned] = useState(!!estimate.signed_at)
+  const [signedDate, setSignedDate] = useState<string | null>(
+    estimate.signed_at ? new Date(estimate.signed_at).toLocaleDateString() : null
+  )
   const [isDesktopDevice, setIsDesktopDevice] = useState(false)
   const [showSigningOptions, setShowSigningOptions] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -42,6 +45,7 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
   useEffect(() => {
     setContractUrl(estimate.contract_pdf_url || null)
     setIsContractSigned(!!estimate.signed_at)
+    setSignedDate(estimate.signed_at ? new Date(estimate.signed_at).toLocaleDateString() : null)
   }, [estimate])
 
   useEffect(() => {
@@ -115,6 +119,7 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
 
       setContractUrl(result.contractUrl)
       setIsContractSigned(true)
+      setSignedDate(new Date().toLocaleDateString())
       
       // Send email notifications
       try {
@@ -209,6 +214,7 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
       // Update the contract URL and mark as signed
       setContractUrl(result.contractUrl)
       setIsContractSigned(true)
+      setSignedDate(new Date().toLocaleDateString())
       setShowUploadOption(false)
 
       // Send email notifications
@@ -263,34 +269,21 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
   return (
     <div className="space-y-6">
       {/* Contract Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center">
-              <FileText className="w-5 h-5 mr-2" />
-              Contract Status
-            </div>
-            {isContractSigned ? (
-              <Badge className="bg-green-100 text-green-800">
-                <CheckCircle className="w-3 h-3 mr-1" />
-                Signed
-              </Badge>
-            ) : contractUrl ? (
-              <Badge className="bg-yellow-100 text-yellow-800">
-                <AlertCircle className="w-3 h-3 mr-1" />
-                Awaiting Signature
-              </Badge>
-            ) : (
-              <Badge variant="outline">
-                Not Generated
-              </Badge>
-            )}
-          </CardTitle>
-          <CardDescription>
-            Review and sign the landscaping contract
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="retro-card-tile retro-card-gray">
+        <div className="tile-row">
+          <h3 className="retro-card-title text-base flex items-center">
+            <FileText className="w-5 h-5 mr-2" /> Contract Status
+          </h3>
+          {isContractSigned ? (
+            <span className="chip-sm bg-green-100 text-green-800 border-green-200">Signed</span>
+          ) : contractUrl ? (
+            <span className="chip-sm bg-yellow-100 text-yellow-800 border-yellow-200">Awaiting Signature</span>
+          ) : (
+            <span className="chip-sm">Not Generated</span>
+          )}
+        </div>
+        <p className="retro-card-meta">Review and sign the landscaping contract</p>
+        <div className="space-y-4">
           {!contractUrl ? (
             <div className="text-center py-8">
               <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -298,12 +291,7 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
               <p className="text-gray-500 mb-4">
                 Create a professional contract based on your estimate
               </p>
-              <Button
-                onClick={generateContract}
-                disabled={isGenerating}
-                className="bg-blue-600 hover:bg-blue-700"
-                size="lg"
-              >
+              <button onClick={generateContract} disabled={isGenerating} className="retro-cta">
                 {isGenerating ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -315,11 +303,11 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
                     Generate Contract PDF
                   </>
                 )}
-              </Button>
+              </button>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="retro-card-tile">
                 <div className="flex items-center space-x-3">
                   <FileText className="w-8 h-8 text-blue-500" />
                   <div>
@@ -329,26 +317,18 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
                     </p>
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={downloadContract}
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={downloadContract}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                  </Button>
+                <div className="tile-row mt-2">
+                  <button className="retro-chip" onClick={downloadContract}>
+                    <Eye className="w-4 h-4 mr-1" /> View
+                  </button>
+                  <button className="retro-chip" onClick={downloadContract}>
+                    <Download className="w-4 h-4 mr-1" /> Download
+                  </button>
                 </div>
               </div>
 
               {!isContractSigned && (
-                <div className="text-center p-6 bg-blue-50 rounded-lg">
+                <div className="retro-card-tile text-center">
                   <Signature className="w-12 h-12 text-blue-500 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Ready to Sign</h3>
                   <p className="text-gray-600 mb-4">
@@ -359,34 +339,28 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
                     // Desktop signing options
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Button
-                          onClick={downloadForAdobeSigning}
-                          disabled={isSigning}
-                          className="bg-red-600 hover:bg-red-700 flex-1"
-                          size="lg"
-                        >
+                        <button onClick={downloadForAdobeSigning} disabled={isSigning} className="retro-cta">
                           <ExternalLink className="w-5 h-5 mr-2" />
                           Sign with Adobe Acrobat
-                        </Button>
-                        <Button
+                        </button>
+                        <button
                           onClick={() => {
                             console.log('Web signature button clicked')
                             setShowSignature(true)
                           }}
                           disabled={isSigning}
-                          variant="outline"
-                          size="lg"
+                          className="retro-chip"
                         >
                           <Signature className="w-5 h-5 mr-2" />
                           Sign Online
-                        </Button>
+                        </button>
                       </div>
                       <p className="text-sm text-gray-500">
                         Recommended: Use Adobe Acrobat for a professional signature experience
                       </p>
                       
                       {showUploadOption && (
-                        <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                        <div className="retro-card-tile">
                           <h4 className="font-medium text-orange-800 mb-2">Upload Signed Contract</h4>
                           <p className="text-sm text-orange-700 mb-3">
                             Once you've signed the contract in Adobe Acrobat, upload it here to complete the process.
@@ -401,12 +375,7 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
                               id="signed-contract-upload"
                             />
                             <label htmlFor="signed-contract-upload">
-                              <Button
-                                asChild
-                                disabled={isUploading}
-                                className="bg-orange-600 hover:bg-orange-700 cursor-pointer"
-                              >
-                                <span>
+                              <span className="retro-cta cursor-pointer select-none">
                                   {isUploading ? (
                                     <>
                                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -418,8 +387,7 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
                                       Upload Signed Contract
                                     </>
                                   )}
-                                </span>
-                              </Button>
+                              </span>
                             </label>
                           </div>
                         </div>
@@ -427,14 +395,13 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
                     </div>
                   ) : (
                     // Mobile/tablet signing - web only
-                    <Button
+                    <button
                       onClick={() => {
                         console.log('Sign Contract button clicked')
                         setShowSignature(true)
                       }}
                       disabled={isSigning}
-                      className="bg-green-600 hover:bg-green-700"
-                      size="lg"
+                      className="retro-cta"
                     >
                       {isSigning ? (
                         <>
@@ -447,37 +414,35 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
                           Sign Contract
                         </>
                       )}
-                    </Button>
+                    </button>
                   )}
                 </div>
               )}
 
               {isContractSigned && (
-                <div className="text-center p-6 bg-green-50 rounded-lg">
+                <div className="retro-card-tile text-center">
                   <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Contract Signed!</h3>
                   <p className="text-gray-600 mb-4">
                     Thank you! The contract has been signed and saved.
                   </p>
-                  <div className="text-sm text-green-600">
-                    Signed on {estimate.signed_at ? new Date(estimate.signed_at).toLocaleDateString() : 'Unknown date'}
-                  </div>
+              <div className="text-sm text-green-600">
+                Signed on {signedDate || (estimate.signed_at ? new Date(estimate.signed_at).toLocaleDateString() : new Date().toLocaleDateString())}
+              </div>
                 </div>
               )}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Contract Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Contract Summary</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="retro-card-tile">
+        <h3 className="retro-card-title text-base mb-2">Contract Summary</h3>
+        <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-medium mb-2">Client Information</h4>
+              <h4 className="retro-card-title mb-2">Client Information</h4>
               <div className="space-y-1 text-sm">
                 <p><strong>Name:</strong> {session.client_name}</p>
                 <p><strong>Address:</strong> {session.client_address || 'N/A'}</p>
@@ -486,7 +451,7 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
               </div>
             </div>
             <div>
-              <h4 className="font-medium mb-2">Project Details</h4>
+              <h4 className="retro-card-title mb-2">Project Details</h4>
               <div className="space-y-1 text-sm">
                 <p><strong>Total Amount:</strong> ${calculateEstimateTotal().toFixed(2)}</p>
                 <p><strong>Items:</strong> {getEstimateItems().length} services</p>
@@ -496,10 +461,10 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
           </div>
 
           <div>
-            <h4 className="font-medium mb-2">Services Included</h4>
+            <h4 className="retro-card-title mb-2">Services Included</h4>
             <div className="space-y-2">
               {getEstimateItems().map((item: any, index: number) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                <div key={index} className="retro-card-tile retro-card-gray tile-row">
                   <div>
                     <span className="font-medium">{item.name}</span>
                     <span className="text-gray-500 ml-2">({item.quantity} {item.unit})</span>
@@ -511,8 +476,8 @@ export default function ContractGenerator({ session, estimate, onContractSigned 
               ))}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Signature Capture Modal */}
       {showSignature && (

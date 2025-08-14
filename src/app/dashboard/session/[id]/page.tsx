@@ -114,13 +114,13 @@ export default function SessionPage() {
       completedSteps.add(4)
     }
     
-    // Step 5: Contract - completed if contract is signed
-    if (estimate?.signed_at) {
+    // Step 5: Contract - completed if contract is signed or session reflects signed/completed
+    if (estimate?.signed_at || session.status === 'contract_signed' || session.status === 'completed') {
       completedSteps.add(5)
     }
     
-    // Step 6: Complete - completed if contract is signed
-    if (estimate?.signed_at) {
+    // Step 6: Complete - completed if contract is signed or session reflects signed/completed
+    if (estimate?.signed_at || session.status === 'contract_signed' || session.status === 'completed') {
       completedSteps.add(6)
     }
     
@@ -159,7 +159,14 @@ export default function SessionPage() {
           />
         )
       case 3:
-        return <MockupStep session={session} onNext={() => setCurrentStep(4)} onBack={() => setCurrentStep(2)} />
+        return (
+          <MockupStep
+            session={session}
+            onNext={() => setCurrentStep(4)}
+            onBack={() => setCurrentStep(2)}
+            onUpdateSession={setSession}
+          />
+        )
       case 4:
         return (
           <EstimateStep 
@@ -260,9 +267,9 @@ export default function SessionPage() {
                       <div 
                         className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 ${
                           stepStatus === 'completed' 
-                            ? 'bg-green-600 text-white shadow-lg' 
+                            ? 'bg-[#2bbf9e] text-white shadow-lg' 
                             : stepStatus === 'current'
-                            ? 'bg-blue-600 text-white shadow-lg'
+                            ? 'bg-red-600 text-white shadow-lg'
                             : isClickable
                             ? 'bg-gray-300 text-gray-600'
                             : 'bg-gray-200 text-gray-400'
@@ -280,12 +287,12 @@ export default function SessionPage() {
                         <button
                           onClick={() => isClickable && handleStepClick(step.id)}
                           disabled={!isClickable}
-                          className={`text-xs font-medium transition-all duration-200 ${
+                          className={`text-xs font-medium px-3 py-1 rounded-full transition-all duration-200 ${
                             isClickable 
                               ? stepStatus === 'completed'
-                                ? 'text-green-600 hover:text-green-800 cursor-pointer hover:underline'
+                                 ? 'text-[#2bbf9e] hover:text-[#1e8d75] cursor-pointer hover:underline'
                                 : stepStatus === 'current'
-                                ? 'text-blue-600 hover:text-blue-800 cursor-pointer hover:underline'
+                                ? 'text-red-600 hover:text-red-800 cursor-pointer hover:underline'
                                 : 'text-gray-600 hover:text-gray-800 cursor-pointer hover:underline'
                               : 'text-gray-400 cursor-not-allowed'
                           }`}
@@ -301,8 +308,8 @@ export default function SessionPage() {
                     </div>
                     {index < WORKFLOW_STEPS.length - 1 && (
                       <div className="flex items-center mx-4">
-                        <ArrowRight className={`w-4 h-4 ${
-                          stepStatus === 'completed' ? 'text-green-400' : 'text-gray-300'
+                           <ArrowRight className={`w-4 h-4 ${
+                          stepStatus === 'completed' ? 'text-[#6fe0c9]' : 'text-gray-300'
                         }`} />
                       </div>
                     )}
@@ -410,7 +417,7 @@ function PhotoUploadStep({
   )
 }
 
-function MockupStep({ session, onNext, onBack }: { session: Session | null, onNext: () => void, onBack: () => void }) {
+function MockupStep({ session, onNext, onBack, onUpdateSession }: { session: Session | null, onNext: () => void, onBack: () => void, onUpdateSession: (session: Session) => void }) {
   if (!session) return null
 
   const handleMockupGenerated = (mockup: any) => {
@@ -423,6 +430,7 @@ function MockupStep({ session, onNext, onBack }: { session: Session | null, onNe
       <MockupGenerator
         session={session}
         onMockupGenerated={handleMockupGenerated}
+        onFinalized={(url) => session && onUpdateSession({ ...session, final_mockup_url: url } as Session)}
       />
       
       <div className="flex justify-between mt-24">
@@ -588,22 +596,18 @@ function CompleteStep({ session, onBack }: { session: Session | null, onBack: ()
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <CheckCircle className="w-5 h-5 mr-2" />
-          Session Complete
-        </CardTitle>
-        <CardDescription>
-          {isCompleted ? 'Session has been completed!' : 'Mark this session as completed'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="retro-card-tile">
+      <div className="tile-row">
+        <h3 className="retro-card-title text-base flex items-center">
+          <CheckCircle className="w-5 h-5 mr-2" /> Session Complete
+        </h3>
+        <span className="retro-card-meta">{isCompleted ? 'Session has been completed!' : 'Mark this session as completed'}</span>
+      </div>
         {isCompleted ? (
-          <div className="text-center py-12">
+          <div className="text-center py-10">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">🎉 Session Completed!</h3>
-            <p className="text-gray-500 mb-6">All tasks completed and client notified</p>
+            <h3 className="text-lg font-medium mb-2">🎉 Session Completed!</h3>
+            <p className="retro-card-meta mb-6">All tasks completed and client notified</p>
             <div className="space-y-2">
               <p className="text-sm text-green-600">✓ Contract signed and saved</p>
               <p className="text-sm text-green-600">✓ Client completion email sent</p>
@@ -612,48 +616,33 @@ function CompleteStep({ session, onBack }: { session: Session | null, onBack: ()
             </div>
           </div>
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center py-10">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Ready to Complete</h3>
-            <p className="text-gray-500 mb-6">
-              Mark this session as completed to send final notifications and wrap up the process
-            </p>
-            <Button
-              onClick={completeSession}
-              disabled={isCompleting}
-              className="bg-green-600 hover:bg-green-700"
-              size="lg"
-            >
+            <h3 className="text-lg font-medium mb-2">Ready to Complete</h3>
+            <p className="retro-card-meta mb-6">Mark this session as completed to send final notifications and wrap up the process</p>
+            <button onClick={completeSession} disabled={isCompleting} className="retro-cta">
               {isCompleting ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Completing Session...
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" /> Completing Session...
                 </>
               ) : (
                 <>
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                  Complete Session
+                  <CheckCircle className="w-5 h-5 mr-2" /> Complete Session
                 </>
               )}
-            </Button>
+            </button>
           </div>
         )}
-        
-      <div className="flex justify-between mt-12">
-          <Button variant="outline" onClick={onBack}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <Button 
-            onClick={() => window.location.href = '/dashboard'} 
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Return to Dashboard
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="tile-row mt-8">
+        <button className="retro-chip" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back
+        </button>
+        <button className="retro-cta" onClick={() => (window.location.href = '/dashboard')}>
+          Return to Dashboard
+        </button>
+      </div>
+    </div>
   )
 }

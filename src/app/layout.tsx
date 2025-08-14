@@ -31,20 +31,18 @@ export default function RootLayout({
       <body className={`${inter.className} min-h-screen`}>
         <div className="min-h-screen flex flex-col">
           {/* Global Header with retro styling */}
-          <div className="px-4 pt-6 mb-8 md:mb-10">
-            <div className="max-w-5xl mx-auto">
-              <header className="retro-screen flex items-center justify-center text-center">
-                <div>
-                  <h1 className="text-2xl font-bold leading-none">e5000</h1>
-                  <p className="text-sm opacity-90 mt-1">Gardens of Babylon</p>
-                </div>
-              </header>
-            </div>
+          <div className="px-4 pt-4 mb-2 md:mb-3">
+            <header className="vintage-header max-w-5xl mx-auto">
+              <div>
+                <h1 className="vh-title">e5000</h1>
+                <p className="vh-subtitle">Gardens of Babylon</p>
+              </div>
+            </header>
           </div>
 
           {/* Main Content */}
           <main className="flex-1">
-            <div className="max-w-5xl mx-auto px-4 py-10 pb-16">
+            <div className="max-w-5xl mx-auto px-4 pt-2 pb-12">
               {children}
             </div>
           </main>

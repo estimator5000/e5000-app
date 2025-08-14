@@ -15,9 +15,10 @@ type Mockup = Database['public']['Tables']['mockups']['Row']
 interface MockupGeneratorProps {
   session: Session
   onMockupGenerated: (mockup: Mockup) => void
+  onFinalized?: (imageUrl: string) => void
 }
 
-export default function MockupGenerator({ session, onMockupGenerated }: MockupGeneratorProps) {
+export default function MockupGenerator({ session, onMockupGenerated, onFinalized }: MockupGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [customPrompt, setCustomPrompt] = useState('')
   const [mockups, setMockups] = useState<Mockup[]>([])
@@ -100,40 +101,23 @@ export default function MockupGenerator({ session, onMockupGenerated }: MockupGe
 
   const markAsFinal = async (mockupId: string) => {
     try {
-      // Mark all mockups as not final first
-      await supabase
-        .from('mockups')
-        .update({ is_final: false })
-        .eq('session_id', session.id)
+      console.log('Marking as final', { mockupId, sessionId: session.id })
+      const res = await fetch('/api/mark-final', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: session.id, mockupId })
+      })
+      const text = await res.text()
+      let json: any
+      try { json = JSON.parse(text) } catch { json = { raw: text } }
+      if (!res.ok) throw new Error(json?.error || 'Failed to mark final')
 
-      // Mark selected mockup as final
-      const { error } = await supabase
-        .from('mockups')
-        .update({ is_final: true })
-        .eq('id', mockupId)
-
-      if (error) {
-        throw error
-      }
-
-      // Update session with final mockup URL
-      const finalMockup = mockups.find(m => m.id === mockupId)
-      if (finalMockup) {
-        await supabase
-          .from('sessions')
-          .update({ 
-            final_mockup_url: finalMockup.image_url,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', session.id)
-      }
-
+      if (json.final_mockup_url && onFinalized) onFinalized(json.final_mockup_url)
       await fetchMockups()
       alert('Mockup marked as final!')
-
-    } catch (error) {
-      console.error('Error marking mockup as final:', error)
-      alert('Failed to mark mockup as final')
+    } catch (error: any) {
+      console.error('Error marking mockup as final:', error?.message || error)
+      alert(`Failed to mark mockup as final: ${error?.message || 'Unknown error'}`)
     }
   }
 

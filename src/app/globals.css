@@ -21,7 +21,7 @@
   --button-gap: 10px; /* uniform spacing between buttons */
   --button-height: 44px; /* standard CTA height */
   --button-padding-x: 18px; /* standard CTA horizontal padding */
-  --background: 248 245 240; /* warm cream page background */
+  --background: 20 116 114; /* match header blue-teal */
   --foreground: 26 26 26;    /* neutral dark text */
   --muted: 236 233 228;      /* subtle gray-beige */
   --muted-foreground: 120 116 111;
@@ -851,12 +851,55 @@ input:focus::placeholder, textarea:focus::placeholder {
 
 /* --- Retro shop-style UI (to match reference) --- */
 .retro-screen {
-  background: #147472;
-  background: linear-gradient(180deg, rgba(20,116,114,1) 0%, rgba(18,96,94,1) 100%);
+  background: #78c2bf;
   border-radius: 28px;
   padding: 24px 24px 20px 24px;
   color: #f9fafb;
   box-shadow: 0 20px 60px rgba(16, 24, 40, 0.15);
+}
+
+/* Vintage banner header (with image) */
+.vintage-header {
+  --vh-base: #d2b48c;
+  --vh-light: #e9d8b4;
+  --vh-ink: #3a3a2a;
+  position: relative;
+  border-radius: 16px;
+  padding: 20px 24px;
+  color: var(--vh-ink);
+  overflow: hidden;
+  text-align: center;
+  box-shadow: 0 14px 40px rgba(60, 40, 20, 0.25);
+  border: 1px solid rgba(58,58,42,0.08);
+  height: clamp(220px, 30vw, 360px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    url('/vintage-header.jpg'),
+    radial-gradient(circle at 15% 30%, rgba(255,255,255,0.12), rgba(255,255,255,0) 45%),
+    radial-gradient(circle at 85% 68%, rgba(255,255,255,0.10), rgba(255,255,255,0) 40%),
+    radial-gradient(60% 80% at 65% 65%, rgba(255,255,255,0.18), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.08)),
+    repeating-conic-gradient(from -8deg, var(--vh-base) 0deg 6deg, var(--vh-light) 6deg 12deg);
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-position: center, center, center, center, center, center;
+  background-size: contain, auto, auto, auto, auto, auto;
+  background-blend-mode: normal, multiply, multiply, normal, multiply, normal;
+}
+
+.vintage-header .vh-title {
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  font-size: clamp(22px, 3.4vw, 34px);
+  color: var(--vh-ink);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.65), 0 10px 24px rgba(0,0,0,0.18);
+}
+
+.vintage-header .vh-subtitle {
+  margin-top: 4px;
+  font-size: 14px;
+  color: rgba(43,33,26,0.75);
 }
 
 /* Global section spacing helpers */
@@ -924,7 +967,7 @@ input:focus::placeholder, textarea:focus::placeholder {
 
 .retro-card-tile {
   background: linear-gradient(180deg,#fbf3e8 0%, #f7ebde 100%);
-  border: 1px solid #eadac8;
+  border: none;
   border-radius: 20px;
   box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
   padding: 14px;
@@ -933,6 +976,11 @@ input:focus::placeholder, textarea:focus::placeholder {
   gap: 10px;
   transition: transform .2s ease, box-shadow .2s ease;
   margin-bottom: var(--card-gap);
+}
+
+/* Landing page variant (mint green) */
+.landing-card {
+  background: linear-gradient(180deg, #d9f4ef 0%, #c7ece6 100%);
 }
 
 .retro-card-tile:hover {
